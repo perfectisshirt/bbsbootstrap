@@ -42,8 +42,13 @@ Base.prototype.getClass = function(className,idName){
 };
 
 
-//获取某一个节点,有时候我们只需要获取其中的一个节点
-Base.prototype.getElement = function(num){
+//获取某一个节点,有时候我们只需要获取其中的一个节点，返回这个节点对象
+Base.prototype.getElement = function(num){	
+	return this.elements[num];
+};
+
+//获取某个节点,并且返回base对象
+Base.prototype.eq = function(num){
 	var element = this.elements[num];
 	this.elements=[];
 	this.elements[0]=element;
@@ -194,67 +199,9 @@ Base.prototype.resize = function(fn){
 	return this;
 };
 
-
-//拖拽功能
-Base.prototype.drag=function(){
-	for(var i=0;i<this.elements.length;i++){
-		
-			addEvent(this.elements[i],'mousedown',function(e){
-					
-			if(trim(this.innerHTML).length==0)  e.preventDefault();
-			
-			var _this = this;
-			//得到实际的长度,offsetleft是整个物体到左边浏览器的距离
-			var diffX = e.clientX-_this.offsetLeft;
-			var diffY = e.clientY-_this.offsetTop;
-			
-			//光标只有在h2区域的时候才能拖拽
-			if(e.target.tagName=='H2'){
-				addEvent(document,'mousemove',move);
-				addEvent(document,'mouseup',up);
-			}else{
-				removeEvent(document,'mousemove',move);
-				removeEvent(document,'mouseup',up);
-			}
-			
-				
-		
-		    function move(e){
-				var left = e.clientX - diffX;
-				var top = e.clientY  - diffY;
-				//左边拖出浏览器了
-				if(left<0){
-					left=0;
-				}else if(left>getInner().width-_this.offsetWidth){
-					left=getInner().width-_this.offsetWidth;
-				}
-				
-				if(top<0){
-					top=0;
-				}else if(top>getInner().height-_this.offsetHeight){
-					top=getInner().height-_this.offsetHeight;
-				}
-				
-				_this.style.left = left + 'px';
-				_this.style.top = top + 'px';
-				
-				//为IE特别设计的
-				if(typeof _this.setCapture!='undefined'){
-					_this.setCapture();
-				}
-		    }
-			
-			function up(){
-				removeEvent(document,'mousemove',move);
-				removeEvent(document,'mouseup',up);
-				this.onmousemove=null;
-				this.onmouseup=null;
-				//为IE设计的
-				if(typeof _this.releaseCapture!= 'undefined'){
-					_this.releaseCapture();
-				}
-			}
-		});
-	}
-	return this;
+//插件入口
+Base.prototype.extend=function(name,fn){
+	Base.prototype[name]=fn;
 };
+
+
