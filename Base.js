@@ -142,6 +142,7 @@ Base.prototype.lock=function(){
 		this.elements[i].style.width=getInner().width+'px';
 		this.elements[i].style.height=getInner().height+'px';
 		this.elements[i].style.display='block';
+		document.documentElement.style.overflow="hidden";
 	}
 	return this;
 };
@@ -151,6 +152,54 @@ Base.prototype.lock=function(){
 Base.prototype.unlock=function(){
 	for(var i=0;i<this.elements.length;i++){
 		this.elements[i].style.display='none';
+		document.documentElement.style.overflow="auto";
+	}
+	return this;
+};
+
+//拖拽功能
+Base.prototype.drag=function(){
+	for(var i=0;i<this.elements.length;i++){
+		this.elements[i].onmousedown=function(e){
+			preDef(e);
+			var e = getEvent(e);
+			var _this = this;
+			//得到实际的长度,offsetleft是整个物体到左边浏览器的距离
+			var diffX = e.clientX-_this.offsetLeft;
+			var diffY = e.clientY-_this.offsetTop;
+			//为IE特别设计的
+			if(typeof _this.setCapture!='undefined'){
+				_this.setCapture();
+			}
+			document.onmousemove=function(e){
+				var e = getEvent(e);
+				var left = e.clientX - diffX;
+				var top = e.clientY  - diffY;
+				//左边拖出浏览器了
+				if(left<0){
+					left=0;
+				}else if(left>getInner().width-_this.offsetWidth){
+					left=getInner().width-_this.offsetWidth;
+				}
+				
+				if(top<0){
+					top=0;
+				}else if(top>getInner().height-_this.offsetHeight){
+					top=getInner().height-_this.offsetHeight;
+				}
+				
+				_this.style.left = left + 'px';
+				_this.style.top = top + 'px';
+			}
+			document.onmouseup = function(){
+				this.onmousemove=null;
+				this.onmouseup=null;
+				//为IE设计的
+				if(typeof _this.releaseCapture!= 'undefined'){
+					_this.releaseCapture();
+				}
+			}
+		};
 	}
 	return this;
 };
